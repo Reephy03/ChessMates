@@ -1,5 +1,6 @@
 from clases import Tablero
 
+
 def main():
     tablero = Tablero()
     while True:
