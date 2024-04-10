@@ -139,9 +139,8 @@ class Alfil(Pieza):
                 c += dc
                 if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
                     casilla_objetivo = tablero[f][c]
-                    if casilla_objetivo == "  ":  # Casilla vacía
-                        movimientos.append((f, c))
-                    elif casilla_objetivo.color != self.color:  # Pieza enemiga
+                    # Casilla vacía o pieza enemiga
+                    if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
                         break
                     else:
@@ -196,9 +195,8 @@ class Reina(Pieza):
                 c += dc
                 if 0 <= f < 8 and 0 <= c < 8:
                     casilla_objetivo = tablero[f][c]
-                    if casilla_objetivo == "  ":  # Casilla vacía
-                        movimientos.append((f, c))
-                    elif casilla_objetivo.color != self.color:  # Pieza enemiga
+                    # Casilla vacía o pieza enemiga
+                    if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
                         break
                     else:
