@@ -15,5 +15,6 @@ def main():
         if tablero.esta_en_jaque(tablero.turno_actual):
             print("\033[91m¡Cuidado! Tu rey está en jaque.\033[0m")
 
+
 if __name__ == "__main__":
     main()

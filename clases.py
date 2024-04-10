@@ -13,6 +13,7 @@ class Pieza:
         # Devuelve la pieza como string
         return f"{self.color[0]}{self.nombre[0]}"
 
+
 class Peon(Pieza):
     def __init__(self, color):
         super().__init__(color, "peon")
@@ -44,6 +45,7 @@ class Peon(Pieza):
                         movimientos.append((fila + direccion, col_diagonal))
 
         return movimientos
+
 
 class Torre(Pieza):
     def __init__(self, color):
@@ -96,6 +98,7 @@ class Torre(Pieza):
 
         return movimientos
 
+
 class Caballo(Pieza):
     def __init__(self, color):
         super().__init__(color, "caballo")
@@ -116,6 +119,7 @@ class Caballo(Pieza):
                     movimientos.append((f, c))
 
         return movimientos
+
 
 class Alfil(Pieza):
     def __init__(self, color):
@@ -147,6 +151,7 @@ class Alfil(Pieza):
 
         return movimientos
 
+
 class Rey(Pieza):
     def __init__(self, color):
         super().__init__(color, "rey")
@@ -170,6 +175,7 @@ class Rey(Pieza):
                     movimientos.append((f, c))
 
         return movimientos
+
 
 class Reina(Pieza):
     def __init__(self, color):
