@@ -44,6 +44,19 @@ class Peon(Pieza):
                     if isinstance(pieza_diagonal, Pieza) and pieza_diagonal.color != self.color:
                         movimientos.append((fila + direccion, col_diagonal))
 
+        # Lógica En Passant
+        if tablero.ultimo_movimiento:  # Verifica si hay un último movimiento
+            ultimo_inicio, ultimo_fin = tablero.ultimo_movimiento
+            pieza_movida = tablero.tablero[ultimo_fin[0]][ultimo_fin[1]]
+            # Verifica si la pieza es un peón y si se ha movido 2 casillas verticalmente
+            if isinstance(pieza_movida, Peon) and abs(ultimo_inicio[0] - ultimo_fin[0]) == 2:
+                # Verifica si el peón es de distinto color al que hizo el último movimiento
+                if self.color != pieza_movida.color:
+                    # Verifica si el peón que hizo el último movimiento está en la fila y columna del peón actual
+                    if ultimo_fin[0] == fila and abs(ultimo_fin[1] - columna) == 1:
+                        mov_paso_al_paso = (fila + direccion, ultimo_fin[1])  # En Passant
+                        movimientos.append(mov_paso_al_paso)
+
         return movimientos
 
 
@@ -212,6 +225,7 @@ class Tablero:
         self.tablero = [["  " for _ in range(8)] for _ in range(8)]
         self.inicializar_piezas()
         self.turno_actual = "blanco"
+        self.ultimo_movimiento = None
 
     def cambiar_turno(self):
         self.turno_actual = "negro" if self.turno_actual == "blanco" else "blanco"
@@ -313,6 +327,9 @@ class Tablero:
             print("Movimiento no válido, intenta de nuevo.")
             return
 
+        if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):  # Promoción peón
+            self.promocion_peon(fin)
+
         # Mover la pieza y verificar jaque
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
@@ -322,6 +339,7 @@ class Tablero:
             self.tablero[fin[0]][fin[1]] = pieza_destino_original
             print("\033[91mNo puedes realizar ese movimiento, tu rey estaría en jaque.\033[0m")
         else:
+            self.ultimo_movimiento = (inicio, fin)
             self.cambiar_turno()
 
     def es_enroque_valido(self, inicio, fin):
@@ -390,3 +408,8 @@ class Tablero:
         self.tablero[fila_rey][col_torre_origen] = "  "
 
         self.cambiar_turno()
+
+    def promocion_peon(self, posicion):
+        color_peon = self.tablero[posicion[0]][posicion[1]].color  # Almaceno el color del peón
+        self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
+
