@@ -161,8 +161,8 @@ class Rey(Pieza):
         fila, columna = posicion
         # Posibles movimientos del rey en todas las direcciones
         desplazamientos = [(-1, -1), (-1, 0), (-1, 1),
-                           (0, -1),           (0, 1),
-                           (1, -1),  (1, 0),  (1, 1)]
+                           (0, -1), (0, 1),
+                           (1, -1), (1, 0), (1, 1)]
 
         for df, dc in desplazamientos:
             f, c = fila + df, columna + dc
@@ -185,8 +185,8 @@ class Reina(Pieza):
         fila, columna = posicion
         # Direcciones: vertical, horizontal y diagonal
         direcciones = [(-1, -1), (-1, 0), (-1, 1),
-                        (0, -1),          (0, 1),
-                        (1, -1), (1, 0),  (1, 1)]
+                       (0, -1), (0, 1),
+                       (1, -1), (1, 0), (1, 1)]
 
         for df, dc in direcciones:
             f, c = fila, columna
@@ -270,14 +270,22 @@ class Tablero:
         print("  -----------------------")
         print("  a  b  c  d  e  f  g  h")
 
-    def es_movimiento_valido(self, inicio, fin):
+    def validar_pieza_seleccionada(self, inicio):
         pieza = self.tablero[inicio[0]][inicio[1]]
-        if not pieza or not isinstance(pieza, Pieza):
-            print("Movimiento no válido")
+        if not pieza or not isinstance(pieza, Pieza):  # Verificar que selecciono una pieza
+            print("No has seleccionado ninguna pieza.")
             return False
 
-        if pieza.color != self.turno_actual:
-            print("No es tu turno")
+        if pieza.color != self.turno_actual:  # Verificar que es el turno correcto
+            print("No es tu turno.")
+            return False
+
+        return True
+
+    def es_movimiento_valido(self, inicio, fin):
+        pieza = self.tablero[inicio[0]][inicio[1]]
+
+        if not self.validar_pieza_seleccionada(inicio):  # Verificar si selecciono una pieza correcta
             return False
 
         movimientos = pieza.movimientos_validos(inicio, self.tablero)
@@ -290,12 +298,8 @@ class Tablero:
         print(f"Intentando mover de {inicio} a {fin}")
 
         pieza = self.tablero[inicio[0]][inicio[1]]
-        if not pieza or not isinstance(pieza, Pieza):
-            print("No has seleccionado ninguna pieza.")
-            return
 
-        if pieza.color != self.turno_actual:
-            print("No es tu turno.")
+        if not self.validar_pieza_seleccionada(inicio):  # Verificar si selecciono una pieza correcta
             return
 
         # Manejar el enroque
