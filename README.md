@@ -1,4 +1,4 @@
-Hola! Aqui Toni, el alumno del ciclo de ASIR quien esta lidiando con Python.
+Hola! Aqui Reephy, el alumno del ciclo de ASIR quien esta lidiando con Python.
 
 Este es el primero de muchos (ojalá) proyectos en los que participaré. 
 Es la primera vez que programo en Python y la primera vez que intento programar un juego, 
