@@ -40,7 +40,7 @@ class Peon(Pieza):
             col_diagonal = columna + desplazamiento
             if 0 <= col_diagonal < 8:
                 if 0 <= fila + direccion < 8 and tablero.tablero[fila + direccion][col_diagonal] != "  ":
-                    pieza_diagonal = tablero[fila + direccion][col_diagonal]
+                    pieza_diagonal = tablero.tablero[fila + direccion][col_diagonal]
                     if isinstance(pieza_diagonal, Pieza) and pieza_diagonal.color != self.color:
                         movimientos.append((fila + direccion, col_diagonal))
 
@@ -187,6 +187,7 @@ class Rey(Pieza):
 
 
 class Reina(Pieza):
+
     def __init__(self, color):
         super().__init__(color, "reina")
 
@@ -194,9 +195,7 @@ class Reina(Pieza):
         movimientos = []
         fila, columna = posicion
         # Direcciones: vertical, horizontal y diagonal
-        direcciones = [(-1, -1), (-1, 0), (-1, 1),
-                       (0, -1), (0, 1),
-                       (1, -1), (1, 0), (1, 1)]
+        direcciones = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         for df, dc in direcciones:
             f, c = fila, columna
@@ -206,13 +205,15 @@ class Reina(Pieza):
                 if 0 <= f < 8 and 0 <= c < 8:
                     casilla_objetivo = tablero.tablero[f][c]
                     # Casilla vacía o pieza enemiga
-                    if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
+                    if casilla_objetivo == "  ":
                         movimientos.append((f, c))
-                        break
+                    elif casilla_objetivo.color != self.color:
+                        movimientos.append((f, c))
+                        break  # Debe detenerse si encuentra una pieza, ya sea para captura
                     else:
-                        break
+                        break  # Debe detenerse si encuentra una pieza del mismo color
                 else:
-                    break
+                    break  # Debe detenerse si se sale de los límites del tablero
 
         return movimientos
 
@@ -306,9 +307,10 @@ class Tablero:
         return False
 
     def mover_pieza(self, inicio, fin):
-        print(f"Intentando mover de {inicio} a {fin}")
-
         pieza = self.tablero[inicio[0]][inicio[1]]
+
+        if isinstance(pieza, Pieza):
+            print(f"Intentando mover {pieza.nombre} {pieza.color} de {inicio} a {fin}")
 
         if not self.validar_pieza_seleccionada(inicio):  # Verificar si selecciono una pieza correcta
             return
@@ -324,13 +326,11 @@ class Tablero:
             print("Movimiento no válido, intenta de nuevo.")
             return
 
-        if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):
-            self.promocion_peon(fin)
-
         # Mover la pieza y verificar jaque
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
         self.tablero[inicio[0]][inicio[1]] = "  "
+
         if self.esta_en_jaque(self.turno_actual):
             self.tablero[inicio[0]][inicio[1]] = pieza
             self.tablero[fin[0]][fin[1]] = pieza_destino_original
@@ -338,6 +338,10 @@ class Tablero:
         else:
             self.ultimo_movimiento = (inicio, fin)
             self.cambiar_turno()
+            # Verificar promoción del peón
+            if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):
+                print("Condición de promoción alcanzada.")
+                self.promocion_peon(fin)
 
     def es_enroque_valido(self, inicio, fin):
         pieza = self.tablero[inicio[0]][inicio[1]]
@@ -408,5 +412,6 @@ class Tablero:
 
     def promocion_peon(self, posicion):
         color_peon = self.tablero[posicion[0]][posicion[1]].color
-        self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
-
+        if isinstance(self.tablero[posicion[0]][posicion[1]], Peon):
+            self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
+            print(f"Peón promocionando a {self.tablero[posicion[0]][posicion[1]]}")
