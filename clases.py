@@ -28,33 +28,30 @@ class Peon(Pieza):
 
         # Movimiento simple hacia adelante
         if 0 <= fila + direccion < 8:
-            if tablero[fila + direccion][columna] == "  ":
+            if tablero.tablero[fila + direccion][columna] == "  ":
                 movimientos.append((fila + direccion, columna))
 
                 # Movimiento inicial de dos espacios
-                if fila == fila_inicio and tablero[fila + 2 * direccion][columna] == "  ":
+                if fila == fila_inicio and tablero.tablero[fila + 2 * direccion][columna] == "  ":
                     movimientos.append((fila + 2 * direccion, columna))
 
         # Capturas diagonales
         for desplazamiento in [-1, 1]:
             col_diagonal = columna + desplazamiento
             if 0 <= col_diagonal < 8:
-                if 0 <= fila + direccion < 8 and tablero[fila + direccion][col_diagonal] != "  ":
+                if 0 <= fila + direccion < 8 and tablero.tablero[fila + direccion][col_diagonal] != "  ":
                     pieza_diagonal = tablero[fila + direccion][col_diagonal]
                     if isinstance(pieza_diagonal, Pieza) and pieza_diagonal.color != self.color:
                         movimientos.append((fila + direccion, col_diagonal))
 
         # Lógica En Passant
-        if tablero.ultimo_movimiento:  # Verifica si hay un último movimiento
+        if tablero.ultimo_movimiento:
             ultimo_inicio, ultimo_fin = tablero.ultimo_movimiento
             pieza_movida = tablero.tablero[ultimo_fin[0]][ultimo_fin[1]]
-            # Verifica si la pieza es un peón y si se ha movido 2 casillas verticalmente
             if isinstance(pieza_movida, Peon) and abs(ultimo_inicio[0] - ultimo_fin[0]) == 2:
-                # Verifica si el peón es de distinto color al que hizo el último movimiento
                 if self.color != pieza_movida.color:
-                    # Verifica si el peón que hizo el último movimiento está en la fila y columna del peón actual
                     if ultimo_fin[0] == fila and abs(ultimo_fin[1] - columna) == 1:
-                        mov_paso_al_paso = (fila + direccion, ultimo_fin[1])  # En Passant
+                        mov_paso_al_paso = (fila + direccion, ultimo_fin[1])
                         movimientos.append(mov_paso_al_paso)
 
         return movimientos
@@ -71,41 +68,41 @@ class Torre(Pieza):
 
         # Movimientos verticales hacia arriba
         for f in range(fila - 1, -1, -1):
-            if tablero[f][columna] == "  ":
+            if tablero.tablero[f][columna] == "  ":
                 movimientos.append((f, columna))
             else:
                 # Si hay una pieza, revisa si se puede comer
-                if tablero[f][columna].color != self.color:
+                if tablero.tablero[f][columna].color != self.color:
                     movimientos.append((f, columna))
                 break
 
         # Movimientos verticales hacia abajo
         for f in range(fila + 1, 8):
-            if tablero[f][columna] == "  ":
+            if tablero.tablero[f][columna] == "  ":
                 movimientos.append((f, columna))
             else:
                 # Si hay una pieza, revisa si se puede comer
-                if tablero[f][columna].color != self.color:
+                if tablero.tablero[f][columna].color != self.color:
                     movimientos.append((f, columna))
                 break
 
         # Movimientos horizontales hacia la izquierda
         for c in range(columna - 1, -1, -1):
-            if tablero[fila][c] == "  ":
+            if tablero.tablero[fila][c] == "  ":
                 movimientos.append((fila, c))
             else:
                 # Si hay una pieza, revisa si se puede comer
-                if tablero[fila][c].color != self.color:
+                if tablero.tablero[fila][c].color != self.color:
                     movimientos.append((fila, c))
                 break
 
         # Movimientos horizontales hacia la derecha
         for c in range(columna + 1, 8):
-            if tablero[fila][c] == "  ":
+            if tablero.tablero[fila][c] == "  ":
                 movimientos.append((fila, c))
             else:
                 # Si hay una pieza, revisa si se puede comer
-                if tablero[fila][c].color != self.color:
+                if tablero.tablero[fila][c].color != self.color:
                     movimientos.append((fila, c))
                 break
 
@@ -126,7 +123,7 @@ class Caballo(Pieza):
         for df, dc in desplazamientos:
             f, c = fila + df, columna + dc
             if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
-                casilla_objetivo = tablero[f][c]
+                casilla_objetivo = tablero.tablero[f][c]
                 # Verificar si la casilla está vacía o contiene una pieza
                 if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                     movimientos.append((f, c))
@@ -151,7 +148,7 @@ class Alfil(Pieza):
                 f += df
                 c += dc
                 if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
-                    casilla_objetivo = tablero[f][c]
+                    casilla_objetivo = tablero.tablero[f][c]
                     # Casilla vacía o pieza enemiga
                     if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
@@ -181,7 +178,7 @@ class Rey(Pieza):
             f, c = fila + df, columna + dc
 
             if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
-                casilla_objetivo = tablero[f][c]
+                casilla_objetivo = tablero.tablero[f][c]
                 # Casilla vacia o comer pieza
                 if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                     movimientos.append((f, c))
@@ -207,7 +204,7 @@ class Reina(Pieza):
                 f += df
                 c += dc
                 if 0 <= f < 8 and 0 <= c < 8:
-                    casilla_objetivo = tablero[f][c]
+                    casilla_objetivo = tablero.tablero[f][c]
                     # Casilla vacía o pieza enemiga
                     if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
@@ -302,7 +299,7 @@ class Tablero:
         if not self.validar_pieza_seleccionada(inicio):  # Verificar si selecciono una pieza correcta
             return False
 
-        movimientos = pieza.movimientos_validos(inicio, self.tablero)
+        movimientos = pieza.movimientos_validos(inicio, self)
         print(f"Movimientos válidos desde {inicio}: {movimientos}")
         if fin in movimientos:
             return True
@@ -327,7 +324,7 @@ class Tablero:
             print("Movimiento no válido, intenta de nuevo.")
             return
 
-        if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):  # Promoción peón
+        if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):
             self.promocion_peon(fin)
 
         # Mover la pieza y verificar jaque
@@ -388,7 +385,7 @@ class Tablero:
             for c in range(8):
                 pieza = self.tablero[f][c]
                 if isinstance(pieza, Pieza) and pieza.color == color_oponente:
-                    if pos_rey in pieza.movimientos_validos((f, c), self.tablero):
+                    if pos_rey in pieza.movimientos_validos((f, c), self):
                         return True
         return False
 
@@ -410,6 +407,6 @@ class Tablero:
         self.cambiar_turno()
 
     def promocion_peon(self, posicion):
-        color_peon = self.tablero[posicion[0]][posicion[1]].color  # Almaceno el color del peón
+        color_peon = self.tablero[posicion[0]][posicion[1]].color
         self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
 
