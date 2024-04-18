@@ -51,6 +51,7 @@ class Peon(Pieza):
             if isinstance(pieza_movida, Peon) and abs(ultimo_inicio[0] - ultimo_fin[0]) == 2:
                 if self.color != pieza_movida.color:
                     if ultimo_fin[0] == fila and abs(ultimo_fin[1] - columna) == 1:
+                        tablero.tablero[ultimo_fin[0]][ultimo_fin[1]] = "  "
                         mov_paso_al_paso = (fila + direccion, ultimo_fin[1])
                         movimientos.append(mov_paso_al_paso)
 
