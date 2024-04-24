@@ -416,3 +416,32 @@ class Tablero:
         if isinstance(self.tablero[posicion[0]][posicion[1]], Peon):
             self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
             print(f"Peón promocionando a {self.tablero[posicion[0]][posicion[1]]}")
+
+    def jaque_mate(self, color):
+        # Verificar si el rey de este color está en jaque
+        if not self.esta_en_jaque(color):
+            return False
+
+        # Intentar encontrar un movimiento para cualquier pieza del mismo color que saque al rey del jaque
+        for f in range(8):
+            for c in range(8):
+                pieza = self.tablero[f][c]
+                if pieza and pieza.color == color:
+                    pos_inicial = (f, c)
+                    movimientos_validos = pieza.movimientos_validos(pos_inicial, self)
+                    for mov in movimientos_validos:
+                        # Hacer el movimiento y verificar si el rey sigue en jaque
+                        pieza_destino_original = self.tablero[mov[0]][mov[1]]
+                        self.tablero[mov[0]][mov[1]] = pieza
+                        self.tablero[f][c] = "  "
+                        sigue_en_jaque = self.esta_en_jaque(color)
+                        # Revertir el movimiento
+                        self.tablero[f][c] = pieza
+                        self.tablero[mov[0]][mov[1]] = pieza_destino_original
+
+                        if not sigue_en_jaque:
+                            return False  # Hay al menos un movimiento válido que puede sacar al rey del jaque
+
+        # Si no se encontró ningún movimiento para sacar al rey de jaque, es jaque mate
+
+        return True

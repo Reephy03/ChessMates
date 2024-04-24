@@ -13,7 +13,10 @@ def main():
 
         tablero.mover_pieza(inicio, fin)
 
-        if tablero.esta_en_jaque(tablero.turno_actual):
+        if tablero.jaque_mate(tablero.turno_actual):
+            print(f"Jaque Mate! Ganador: {tablero.turno_actual}.")
+            break
+        elif tablero.esta_en_jaque(tablero.turno_actual):
             print("\033[91m¡Cuidado! Tu rey está en jaque.\033[0m")
 
 
