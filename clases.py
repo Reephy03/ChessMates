@@ -4,13 +4,10 @@ class Pieza:
         self.nombre = nombre
 
     def movimientos_validos(self, posicion, tablero):
-        # Esta función devolverá una lista de movimientos válidos desde 'posicion'
         movimientos = []
-        # Aquí vendrá la lógica para calcular los movimientos válidos basados en la posición de la pieza y el tablero
         return movimientos
 
     def __str__(self):
-        # Devuelve la pieza como string
         return f"{self.color[0]}{self.nombre[0]}"
 
 
@@ -22,20 +19,15 @@ class Peon(Pieza):
         movimientos = []
         fila, columna = posicion
 
-        # Definir la dirección del movimiento dependiendo del color del peón
         direccion = -1 if self.color == "negro" else 1
         fila_inicio = 6 if self.color == "negro" else 1
 
-        # Movimiento simple hacia adelante
         if 0 <= fila + direccion < 8:
             if tablero.tablero[fila + direccion][columna] == "  ":
                 movimientos.append((fila + direccion, columna))
-
-                # Movimiento inicial de dos espacios
                 if fila == fila_inicio and tablero.tablero[fila + 2 * direccion][columna] == "  ":
                     movimientos.append((fila + 2 * direccion, columna))
 
-        # Capturas diagonales
         for desplazamiento in [-1, 1]:
             col_diagonal = columna + desplazamiento
             if 0 <= col_diagonal < 8:
@@ -44,14 +36,12 @@ class Peon(Pieza):
                     if isinstance(pieza_diagonal, Pieza) and pieza_diagonal.color != self.color:
                         movimientos.append((fila + direccion, col_diagonal))
 
-        # Lógica En Passant
         if tablero.ultimo_movimiento:
             ultimo_inicio, ultimo_fin = tablero.ultimo_movimiento
             pieza_movida = tablero.tablero[ultimo_fin[0]][ultimo_fin[1]]
             if isinstance(pieza_movida, Peon) and abs(ultimo_inicio[0] - ultimo_fin[0]) == 2:
                 if self.color != pieza_movida.color:
                     if ultimo_fin[0] == fila and abs(ultimo_fin[1] - columna) == 1:
-                        tablero.tablero[ultimo_fin[0]][ultimo_fin[1]] = "  "
                         mov_paso_al_paso = (fila + direccion, ultimo_fin[1])
                         movimientos.append(mov_paso_al_paso)
 
@@ -67,42 +57,34 @@ class Torre(Pieza):
         movimientos = []
         fila, columna = posicion
 
-        # Movimientos verticales hacia arriba
         for f in range(fila - 1, -1, -1):
             if tablero.tablero[f][columna] == "  ":
                 movimientos.append((f, columna))
             else:
-                # Si hay una pieza, revisa si se puede comer
                 if tablero.tablero[f][columna].color != self.color:
                     movimientos.append((f, columna))
                 break
 
-        # Movimientos verticales hacia abajo
         for f in range(fila + 1, 8):
             if tablero.tablero[f][columna] == "  ":
                 movimientos.append((f, columna))
             else:
-                # Si hay una pieza, revisa si se puede comer
                 if tablero.tablero[f][columna].color != self.color:
                     movimientos.append((f, columna))
                 break
 
-        # Movimientos horizontales hacia la izquierda
         for c in range(columna - 1, -1, -1):
             if tablero.tablero[fila][c] == "  ":
                 movimientos.append((fila, c))
             else:
-                # Si hay una pieza, revisa si se puede comer
                 if tablero.tablero[fila][c].color != self.color:
                     movimientos.append((fila, c))
                 break
 
-        # Movimientos horizontales hacia la derecha
         for c in range(columna + 1, 8):
             if tablero.tablero[fila][c] == "  ":
                 movimientos.append((fila, c))
             else:
-                # Si hay una pieza, revisa si se puede comer
                 if tablero.tablero[fila][c].color != self.color:
                     movimientos.append((fila, c))
                 break
@@ -117,15 +99,12 @@ class Caballo(Pieza):
     def movimientos_validos(self, posicion, tablero):
         movimientos = []
         fila, columna = posicion
-        # Las posiciones donde el caballo puede moverse
-        desplazamientos = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
-                           (1, -2), (1, 2), (2, -1), (2, 1)]
+        desplazamientos = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
 
         for df, dc in desplazamientos:
             f, c = fila + df, columna + dc
-            if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
+            if 0 <= f < 8 and 0 <= c < 8:
                 casilla_objetivo = tablero.tablero[f][c]
-                # Verificar si la casilla está vacía o contiene una pieza
                 if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                     movimientos.append((f, c))
 
@@ -139,8 +118,6 @@ class Alfil(Pieza):
     def movimientos_validos(self, posicion, tablero):
         movimientos = []
         fila, columna = posicion
-
-        # Direcciones diagonales: arriba-izquierda, arriba-derecha, abajo-izquierda, abajo-derecha
         direcciones = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         for df, dc in direcciones:
@@ -148,13 +125,11 @@ class Alfil(Pieza):
             while True:
                 f += df
                 c += dc
-                if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
+                if 0 <= f < 8 and 0 <= c < 8:
                     casilla_objetivo = tablero.tablero[f][c]
-                    # Casilla vacía o pieza enemiga
                     if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
-                        break
-                    else:
+                    if casilla_objetivo != "  ":
                         break
                 else:
                     break
@@ -170,17 +145,12 @@ class Rey(Pieza):
     def movimientos_validos(self, posicion, tablero):
         movimientos = []
         fila, columna = posicion
-        # Posibles movimientos del rey en todas las direcciones
-        desplazamientos = [(-1, -1), (-1, 0), (-1, 1),
-                           (0, -1), (0, 1),
-                           (1, -1), (1, 0), (1, 1)]
+        desplazamientos = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
         for df, dc in desplazamientos:
             f, c = fila + df, columna + dc
-
-            if 0 <= f < 8 and 0 <= c < 8:  # Si está dentro del tablero
+            if 0 <= f < 8 and 0 <= c < 8:
                 casilla_objetivo = tablero.tablero[f][c]
-                # Casilla vacia o comer pieza
                 if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                     movimientos.append((f, c))
 
@@ -188,14 +158,12 @@ class Rey(Pieza):
 
 
 class Reina(Pieza):
-
     def __init__(self, color):
-        super().__init__(color, "reina")
+        super().__init__(color, "RA")  # Cambiar el nombre a "RA"
 
     def movimientos_validos(self, posicion, tablero):
         movimientos = []
         fila, columna = posicion
-        # Direcciones: vertical, horizontal y diagonal
         direcciones = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         for df, dc in direcciones:
@@ -205,16 +173,12 @@ class Reina(Pieza):
                 c += dc
                 if 0 <= f < 8 and 0 <= c < 8:
                     casilla_objetivo = tablero.tablero[f][c]
-                    # Casilla vacía o pieza enemiga
-                    if casilla_objetivo == "  ":
+                    if casilla_objetivo == "  " or casilla_objetivo.color != self.color:
                         movimientos.append((f, c))
-                    elif casilla_objetivo.color != self.color:
-                        movimientos.append((f, c))
-                        break  # Debe detenerse si encuentra una pieza, ya sea para captura
-                    else:
-                        break  # Debe detenerse si encuentra una pieza del mismo color
+                    if casilla_objetivo != "  ":
+                        break
                 else:
-                    break  # Debe detenerse si se sale de los límites del tablero
+                    break
 
         return movimientos
 
@@ -230,7 +194,6 @@ class Tablero:
         self.turno_actual = "negro" if self.turno_actual == "blanco" else "blanco"
 
     def inicializar_piezas(self):
-        # Coloca las piezas en el tablero.
         self.tablero[0][0] = Torre("blanco")
         self.tablero[0][7] = Torre("blanco")
         self.tablero[0][1] = Caballo("blanco")
@@ -255,21 +218,20 @@ class Tablero:
     def interpretar_movimiento(self, movimiento):
         movimiento = movimiento.lower()
         if movimiento in ["enroque corto", "enroque largo"]:
-            inicio = "e1" if self.turno_actual == "negro" else "e8"
+            inicio = "e1" if self.turno_actual == "blanco" else "e8"
             fin = "g1" if movimiento == "enroque corto" else "c1"
-            fin = fin if self.turno_actual == "negro" else fin.replace("1", "8")
+            fin = fin if self.turno_actual == "blanco" else fin.replace("1", "8")
         else:
-            partes = movimiento.split()
-            if len(partes) != 2:
-                print("Formato inválido. Usa 'c1 e4' o 'enroque corto/largo'.")
+            if len(movimiento) != 4:
+                print("Formato inválido. Usa 'e2e4' o 'enroque corto/largo'.")
                 return None, None
-            inicio, fin = partes
+            inicio, fin = movimiento[:2], movimiento[2:]
 
         try:
             fila_inicio, col_inicio = 8 - int(inicio[1]), "abcdefgh".index(inicio[0])
             fila_fin, col_fin = 8 - int(fin[1]), "abcdefgh".index(fin[0])
         except (ValueError, IndexError):
-            print("Movimiento no válido. Usa el formato 'c1 e4'.")
+            print("Movimiento no válido. Usa el formato 'e2e4'.")
             return None, None
 
         return (fila_inicio, col_inicio), (fila_fin, col_fin)
@@ -302,7 +264,6 @@ class Tablero:
             return False
 
         movimientos = pieza.movimientos_validos(inicio, self)
-        print(f"Movimientos válidos desde {inicio}: {movimientos}")
         if fin in movimientos:
             return True
         return False
@@ -313,21 +274,18 @@ class Tablero:
         if isinstance(pieza, Pieza):
             print(f"Intentando mover {pieza.nombre} {pieza.color} de {inicio} a {fin}")
 
-        if not self.validar_pieza_seleccionada(inicio):  # Verificar si selecciono una pieza correcta
-            return
+        if not self.validar_pieza_seleccionada(inicio):
+            return False
 
-        # Manejar el enroque
         if isinstance(pieza, Rey) and (fin == (0, 6) or fin == (0, 2) or fin == (7, 6) or fin == (7, 2)):
             if self.es_enroque_valido(inicio, fin):
                 self.realizar_enroque(inicio, fin)
-                return
+                return True
 
-        # Verificar si el movimiento es válido y no pone al rey en jaque
         if not self.es_movimiento_valido(inicio, fin):
             print("Movimiento no válido, intenta de nuevo.")
-            return
+            return False
 
-        # Mover la pieza y verificar jaque
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
         self.tablero[inicio[0]][inicio[1]] = "  "
@@ -336,13 +294,14 @@ class Tablero:
             self.tablero[inicio[0]][inicio[1]] = pieza
             self.tablero[fin[0]][fin[1]] = pieza_destino_original
             print("\033[91mNo puedes realizar ese movimiento, tu rey estaría en jaque.\033[0m")
+            return False
         else:
             self.ultimo_movimiento = (inicio, fin)
             self.cambiar_turno()
-            # Verificar promoción del peón
             if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):
                 print("Condición de promoción alcanzada.")
                 self.promocion_peon(fin)
+            return True
 
     def es_enroque_valido(self, inicio, fin):
         pieza = self.tablero[inicio[0]][inicio[1]]
@@ -367,13 +326,12 @@ class Tablero:
 
         for i in range(0, 3):
             casilla_rey = (inicio[0], inicio[1] + i * direccion)
-            if self.esta_en_jaque(casilla_rey, pieza.color):
+            if self.esta_en_jaque_en_posicion(casilla_rey, pieza.color):
                 return False
 
         return True
 
     def esta_en_jaque(self, color):
-        # Encuentra la posición del rey
         pos_rey = None
         for f in range(8):
             for c in range(8):
@@ -381,16 +339,22 @@ class Tablero:
                 if isinstance(pieza, Rey) and pieza.color == color:
                     pos_rey = (f, c)
                     break
-            if pos_rey:
-                break
-
-        # Verifica si alguna pieza enemiga puede atacar al rey
         color_oponente = "blanco" if color == "negro" else "negro"
         for f in range(8):
             for c in range(8):
                 pieza = self.tablero[f][c]
                 if isinstance(pieza, Pieza) and pieza.color == color_oponente:
                     if pos_rey in pieza.movimientos_validos((f, c), self):
+                        return True
+        return False
+
+    def esta_en_jaque_en_posicion(self, posicion, color):
+        color_oponente = "blanco" if color == "negro" else "negro"
+        for f in range(8):
+            for c in range(8):
+                pieza = self.tablero[f][c]
+                if isinstance(pieza, Pieza) and pieza.color == color_oponente:
+                    if posicion in pieza.movimientos_validos((f, c), self):
                         return True
         return False
 
@@ -413,35 +377,40 @@ class Tablero:
 
     def promocion_peon(self, posicion):
         color_peon = self.tablero[posicion[0]][posicion[1]].color
-        if isinstance(self.tablero[posicion[0]][posicion[1]], Peon):
-            self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)  # Promociona a una reina por defecto
-            print(f"Peón promocionando a {self.tablero[posicion[0]][posicion[1]]}")
+        while True:
+            nueva_pieza = input("Promoción de peón. Elige entre reina (Q), torre (R), alfil (B) o caballo (N): ").upper()
+            if nueva_pieza in ["Q", "R", "B", "N"]:
+                if nueva_pieza == "Q":
+                    self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)
+                elif nueva_pieza == "R":
+                    self.tablero[posicion[0]][posicion[1]] = Torre(color_peon)
+                elif nueva_pieza == "B":
+                    self.tablero[posicion[0]][posicion[1]] = Alfil(color_peon)
+                elif nueva_pieza == "N":
+                    self.tablero[posicion[0]][posicion[1]] = Caballo(color_peon)
+                print(f"Peón promocionado a {self.tablero[posicion[0]][posicion[1]]}")
+                break
+            else:
+                print("Opción no válida. Elige entre reina (Q), torre (R), alfil (B) o caballo (N).")
 
     def jaque_mate(self, color):
-        # Verificar si el rey de este color está en jaque
         if not self.esta_en_jaque(color):
             return False
-
-        # Intentar encontrar un movimiento para cualquier pieza del mismo color que saque al rey del jaque
         for f in range(8):
             for c in range(8):
                 pieza = self.tablero[f][c]
-                if pieza and pieza.color == color:
+                if isinstance(pieza, Pieza) and pieza.color == color:
                     pos_inicial = (f, c)
                     movimientos_validos = pieza.movimientos_validos(pos_inicial, self)
                     for mov in movimientos_validos:
-                        # Hacer el movimiento y verificar si el rey sigue en jaque
                         pieza_destino_original = self.tablero[mov[0]][mov[1]]
                         self.tablero[mov[0]][mov[1]] = pieza
                         self.tablero[f][c] = "  "
                         sigue_en_jaque = self.esta_en_jaque(color)
-                        # Revertir el movimiento
                         self.tablero[f][c] = pieza
                         self.tablero[mov[0]][mov[1]] = pieza_destino_original
 
                         if not sigue_en_jaque:
-                            return False  # Hay al menos un movimiento válido que puede sacar al rey del jaque
-
-        # Si no se encontró ningún movimiento para sacar al rey de jaque, es jaque mate
+                            return False
 
         return True

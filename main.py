@@ -1,23 +1,67 @@
+import pygame
 from clases import Tablero
+from graficos import dibujar_tablero, dibujar_piezas
+
+# Inicializa Pygame
+pygame.init()
+
+# Constantes
+ANCHO, ALTO = 600, 600  # Reducir el tamaño de la ventana
+DIMENSIONES = 8
+TAMANO_CELDA = ANCHO // DIMENSIONES
+FPS = 30
+
+# Colores
+BLANCO = (255, 255, 255)
+NEGRO = (0, 0, 0)
+GRIS = (125, 135, 150)
+CELESTE = (70, 70, 70)
+ROJO = (255, 0, 0)
+
+# Crear la ventana
+VENTANA = pygame.display.set_mode((ANCHO, ALTO))
+pygame.display.set_caption("ChessMates")
 
 
 def main():
+    reloj = pygame.time.Clock()
     tablero = Tablero()
-    while True:
-        tablero.mostrar()
 
-        movimiento = input(f"Turno del jugador {tablero.turno_actual}. Introduce tu movimiento: ")
-        inicio, fin = tablero.interpretar_movimiento(movimiento)
-        if inicio is None or fin is None:  # Verifica si la entrada es inválida
-            continue  # Continúa con el siguiente ciclo del bucle si es inválido
+    activo = True
+    pieza_seleccionada = None
+    inicio = None
 
-        tablero.mover_pieza(inicio, fin)
+    while activo:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                activo = False
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                fila = pos[1] // TAMANO_CELDA
+                columna = pos[0] // TAMANO_CELDA
+                if pieza_seleccionada:
+                    fin = (fila, columna)
+                    if tablero.mover_pieza(inicio, fin):
+                        # Verificar jaque mate después de mover la pieza
+                        if tablero.jaque_mate(tablero.turno_actual):
+                            ganador = "negro" if tablero.turno_actual == "blanco" else "blanco"
+                            print(f"Jaque Mate! Ganador: {ganador}.")
+                            activo = False
+                        pieza_seleccionada = None
+                        inicio = None
+                    else:
+                        pieza_seleccionada = None
+                        inicio = None
+                else:
+                    pieza_seleccionada = tablero.tablero[fila][columna]
+                    inicio = (fila, columna)
 
-        if tablero.jaque_mate(tablero.turno_actual):
-            print(f"Jaque Mate! Ganador: {tablero.turno_actual}.")
-            break
-        elif tablero.esta_en_jaque(tablero.turno_actual):
-            print("\033[91m¡Cuidado! Tu rey está en jaque.\033[0m")
+        dibujar_tablero(VENTANA, TAMANO_CELDA)
+        dibujar_piezas(VENTANA, tablero, TAMANO_CELDA)
+        pygame.display.flip()
+        reloj.tick(FPS)
+
+    pygame.quit()
 
 
 if __name__ == "__main__":
