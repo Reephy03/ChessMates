@@ -42,11 +42,6 @@ def main():
                 if pieza_seleccionada:
                     fin = (fila, columna)
                     if tablero.mover_pieza(inicio, fin):
-                        # Verificar jaque mate después de mover la pieza
-                        if tablero.jaque_mate(tablero.turno_actual):
-                            ganador = "negro" if tablero.turno_actual == "blanco" else "blanco"
-                            print(f"Jaque Mate! Ganador: {ganador}.")
-                            activo = False
                         pieza_seleccionada = None
                         inicio = None
                     else:

@@ -1,3 +1,6 @@
+import pygame
+
+
 class Pieza:
     def __init__(self, color, nombre):
         self.color = color
@@ -236,15 +239,6 @@ class Tablero:
 
         return (fila_inicio, col_inicio), (fila_fin, col_fin)
 
-    def mostrar(self):
-        print("  a  b  c  d  e  f  g  h")
-        print("  -----------------------")
-        for i, fila in enumerate(self.tablero):
-            fila_str = " ".join(str(casilla) if isinstance(casilla, Pieza) else "  " for casilla in fila)
-            print(f"{8 - i}|{fila_str}|{8 - i}")
-        print("  -----------------------")
-        print("  a  b  c  d  e  f  g  h")
-
     def validar_pieza_seleccionada(self, inicio):
         pieza = self.tablero[inicio[0]][inicio[1]]
         if not pieza or not isinstance(pieza, Pieza):  # Verificar que selecciono una pieza
@@ -283,17 +277,23 @@ class Tablero:
                 return True
 
         if not self.es_movimiento_valido(inicio, fin):
-            print("Movimiento no válido, intenta de nuevo.")
+            from graficos import mostrar_mensaje
+            ventana = pygame.display.get_surface()
+            tamano_celda = ventana.get_width() // 8
+            mostrar_mensaje(ventana, "Movimiento no válido, intenta de nuevo.", tamano_celda)
             return False
 
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
         self.tablero[inicio[0]][inicio[1]] = "  "
 
-        if self.esta_en_jaque(self.turno_actual):
+        if self.esta_en_jaque(pieza.color):
             self.tablero[inicio[0]][inicio[1]] = pieza
             self.tablero[fin[0]][fin[1]] = pieza_destino_original
-            print("\033[91mNo puedes realizar ese movimiento, tu rey estaría en jaque.\033[0m")
+            from graficos import mostrar_mensaje
+            ventana = pygame.display.get_surface()
+            tamano_celda = ventana.get_width() // 8
+            mostrar_mensaje(ventana, "No puedes realizar ese movimiento, tu rey estaría en jaque.", tamano_celda)
             return False
         else:
             self.ultimo_movimiento = (inicio, fin)
@@ -301,6 +301,18 @@ class Tablero:
             if isinstance(pieza, Peon) and (fin[0] == 0 or fin[0] == 7):
                 print("Condición de promoción alcanzada.")
                 self.promocion_peon(fin)
+            if self.esta_en_jaque(self.turno_actual):
+                from graficos import mostrar_mensaje
+                ventana = pygame.display.get_surface()
+                tamano_celda = ventana.get_width() // 8
+                mostrar_mensaje(ventana, "¡Cuidado! Tu rey está en jaque.", tamano_celda)
+            if self.jaque_mate(self.turno_actual):
+                ganador = "negro" if self.turno_actual == "blanco" else "blanco"
+                from graficos import mostrar_mensaje
+                ventana = pygame.display.get_surface()
+                tamano_celda = ventana.get_width() // 8
+                mostrar_mensaje(ventana, f"Jaque Mate! Ganador: {ganador}.", tamano_celda)
+                return False
             return True
 
     def es_enroque_valido(self, inicio, fin):
@@ -339,6 +351,12 @@ class Tablero:
                 if isinstance(pieza, Rey) and pieza.color == color:
                     pos_rey = (f, c)
                     break
+            if pos_rey:
+                break  # Salir del bucle una vez encontrado el rey
+
+        if not pos_rey:
+            return False  # No se encontró el rey, no debería suceder
+
         color_oponente = "blanco" if color == "negro" else "negro"
         for f in range(8):
             for c in range(8):
@@ -377,21 +395,25 @@ class Tablero:
 
     def promocion_peon(self, posicion):
         color_peon = self.tablero[posicion[0]][posicion[1]].color
-        while True:
-            nueva_pieza = input("Promoción de peón. Elige entre reina (Q), torre (R), alfil (B) o caballo (N): ").upper()
-            if nueva_pieza in ["Q", "R", "B", "N"]:
-                if nueva_pieza == "Q":
-                    self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)
-                elif nueva_pieza == "R":
-                    self.tablero[posicion[0]][posicion[1]] = Torre(color_peon)
-                elif nueva_pieza == "B":
-                    self.tablero[posicion[0]][posicion[1]] = Alfil(color_peon)
-                elif nueva_pieza == "N":
-                    self.tablero[posicion[0]][posicion[1]] = Caballo(color_peon)
-                print(f"Peón promocionado a {self.tablero[posicion[0]][posicion[1]]}")
-                break
-            else:
-                print("Opción no válida. Elige entre reina (Q), torre (R), alfil (B) o caballo (N).")
+        from graficos import dibujar_menu_promocion, obtener_eleccion_promocion
+
+        ventana = pygame.display.get_surface()
+        tamano_celda = ventana.get_width() // 8
+
+        dibujar_menu_promocion(ventana, color_peon, tamano_celda)
+        nueva_pieza = obtener_eleccion_promocion(ventana, tamano_celda)
+
+        if nueva_pieza:
+            if nueva_pieza == 'Reina':
+                self.tablero[posicion[0]][posicion[1]] = Reina(color_peon)
+            elif nueva_pieza == 'Torre':
+                self.tablero[posicion[0]][posicion[1]] = Torre(color_peon)
+            elif nueva_pieza == 'Alfil':
+                self.tablero[posicion[0]][posicion[1]] = Alfil(color_peon)
+            elif nueva_pieza == 'Caballo':
+                self.tablero[posicion[0]][posicion[1]] = Caballo(color_peon)
+            print(f"Peón promocionado a {self.tablero[posicion[0]][posicion[1]]}")
+
 
     def jaque_mate(self, color):
         if not self.esta_en_jaque(color):
