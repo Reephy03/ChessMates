@@ -10,7 +10,7 @@ NEGRO = (0, 0, 0)
 GRIS = (125, 135, 150)
 CELESTE = (70, 70, 70)
 ROJO = (255, 0, 0)
-VERDE = (0, 255, 0)  # Verde para resaltar la pieza seleccionada
+VERDE = (0, 255, 0) 
 
 
 def dibujar_tablero(ventana, tamano_celda, seleccionada=None, en_jaque=None):
