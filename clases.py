@@ -276,7 +276,7 @@ class Tablero:
         # Simular el movimiento
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
-        self.tablero[inicio[0]][inicio[1]] = "  "  # Asegurarse de vaciar el lugar de origen
+        self.tablero[inicio[0]][inicio[1]] = "  "
 
         # Verificar si el rey queda en jaque después del movimiento
         if self.esta_en_jaque(pieza.color):
