@@ -36,12 +36,14 @@ def main():
 
                 if pieza_seleccionada:
                     if tablero.mover_pieza(inicio, seleccion_actual):
+                        tablero.cambiar_turno()
                         if tablero.jaque_mate(tablero.turno_actual):
-                            mostrar_mensaje(VENTANA, "Jaque Mate! Ganador: " + ("Blanco" if tablero.turno_actual == "Negro" else "Negro"), TAMANO_CELDA)
+                            mostrar_mensaje(VENTANA, "Jaque Mate! Ganador: " + ("Negro" if tablero.turno_actual == "Blanco" else "Blanco"), TAMANO_CELDA)
+                            pygame.display.flip()  # Actualiza la pantalla para mostrar el mensaje
+                            pygame.time.wait(3000)  # Espera 3 segundos para que el mensaje sea visible
                             activo = False
                         elif tablero.esta_en_jaque(tablero.turno_actual):
                             mostrar_mensaje(VENTANA, "¡Cuidado! Tu rey está en jaque.", TAMANO_CELDA)
-                        tablero.cambiar_turno()
                     pieza_seleccionada = None
                     inicio = None
                 else:

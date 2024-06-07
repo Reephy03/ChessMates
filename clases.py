@@ -247,7 +247,7 @@ class Tablero:
     def mover_pieza(self, inicio, fin):
         pieza = self.tablero[inicio[0]][inicio[1]]
 
-        if not pieza:
+        if not isinstance(pieza, Pieza):
             print("No hay pieza en la posición inicial.")
             from graficos import mostrar_mensaje
             ventana = pygame.display.get_surface()
@@ -276,7 +276,7 @@ class Tablero:
         # Simular el movimiento
         pieza_destino_original = self.tablero[fin[0]][fin[1]]
         self.tablero[fin[0]][fin[1]] = pieza
-        self.tablero[inicio[0]][inicio[1]] = "  "  # Asegurarse de vaciar el lugar de origen
+        self.tablero[inicio[0]][inicio[1]] = "  "
 
         # Verificar si el rey queda en jaque después del movimiento
         if self.esta_en_jaque(pieza.color):
@@ -422,7 +422,7 @@ class Tablero:
         for f in range(8):
             for c in range(8):
                 pieza = self.tablero[f][c]
-                if pieza and pieza.color == color:
+                if isinstance(pieza, Pieza) and pieza.color == color:  # Verifica si es una instancia de Pieza
                     pos_inicial = (f, c)
                     movimientos_validos = pieza.movimientos_validos(pos_inicial, self)
                     for mov in movimientos_validos:
