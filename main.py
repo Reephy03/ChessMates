@@ -1,6 +1,6 @@
 import pygame
-from clases import Tablero
-from graficos import dibujar_tablero, dibujar_piezas
+from clases import Tablero, Pieza
+from graficos import dibujar_tablero, dibujar_piezas, cargar_imagenes, mostrar_mensaje
 
 # Inicializa Pygame
 pygame.init()
@@ -11,26 +11,18 @@ DIMENSIONES = 8
 TAMANO_CELDA = ANCHO // DIMENSIONES
 FPS = 30
 
-# Colores
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-GRIS = (125, 135, 150)
-CELESTE = (70, 70, 70)
-ROJO = (255, 0, 0)
-
 # Crear la ventana
 VENTANA = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("ChessMates")
 
-
 def main():
     reloj = pygame.time.Clock()
     tablero = Tablero()
-
+    imagenes = cargar_imagenes(TAMANO_CELDA)
     activo = True
+
     pieza_seleccionada = None
     inicio = None
-    imagenes = cargar_imagenes(TAMANO_CELDA)
 
     while activo:
         for evento in pygame.event.get():
@@ -40,38 +32,37 @@ def main():
                 pos = pygame.mouse.get_pos()
                 fila = pos[1] // TAMANO_CELDA
                 columna = pos[0] // TAMANO_CELDA
-                if pieza_seleccionada:
-                    fin = (fila, columna)
-                    if tablero.mover_pieza(inicio, fin):
-                        pieza_seleccionada = None
-                        inicio = None
-                    else:
-                        pieza_seleccionada = None
-                        inicio = None
-                else:
-                    pieza_seleccionada = tablero.tablero[fila][columna]
-                    inicio = (fila, columna)
+                seleccion_actual = (fila, columna)
 
-        dibujar_tablero(VENTANA, TAMANO_CELDA)
-        dibujar_piezas(VENTANA, tablero, TAMANO_CELDA)
+                if pieza_seleccionada:
+                    if tablero.mover_pieza(inicio, seleccion_actual):
+                        if tablero.jaque_mate(tablero.turno_actual):
+                            mostrar_mensaje(VENTANA, "Jaque Mate! Ganador: " + ("Blanco" if tablero.turno_actual == "Negro" else "Negro"), TAMANO_CELDA)
+                            activo = False
+                        elif tablero.esta_en_jaque(tablero.turno_actual):
+                            mostrar_mensaje(VENTANA, "¡Cuidado! Tu rey está en jaque.", TAMANO_CELDA)
+                        tablero.cambiar_turno()
+                    pieza_seleccionada = None
+                    inicio = None
+                else:
+                    if tablero.tablero[fila][columna] != "  " and isinstance(tablero.tablero[fila][columna], Pieza):
+                        if tablero.tablero[fila][columna].color == tablero.turno_actual:
+                            pieza_seleccionada = tablero.tablero[fila][columna]
+                            inicio = seleccion_actual
+                        else:
+                            mostrar_mensaje(VENTANA, "No es tu turno.", TAMANO_CELDA)
+                    else:
+                        mostrar_mensaje(VENTANA, "No hay pieza en la posición seleccionada.", TAMANO_CELDA)
+
+        # Obtener la posición de la pieza que está en jaque
+        posicion_jaque = tablero.obtener_pieza_jaque(tablero.turno_actual) if tablero.esta_en_jaque(tablero.turno_actual) else None
+
+        dibujar_tablero(VENTANA, TAMANO_CELDA, seleccionada=inicio, en_jaque=posicion_jaque)
+        dibujar_piezas(VENTANA, tablero, imagenes, seleccionada=inicio, en_jaque=posicion_jaque)
         pygame.display.flip()
         reloj.tick(FPS)
 
     pygame.quit()
-
-
-def cargar_imagenes(tamano_celda):
-    nombres = ['Rey', 'Reina', 'Torre', 'Alfil', 'Caballo', 'Peon']
-    colores = ['Blanco', 'Negro']
-    imagenes = {}
-    for color in colores:
-        for nombre in nombres:
-            ruta = f'images/{nombre}{color}.png'
-            imagen = pygame.image.load(ruta)
-            imagen = pygame.transform.scale(imagen,(tamano_celda, tamano_celda))  # Escalar la imagen al tamaño de la celda
-            imagenes[f'{nombre.lower()}_{color.lower()}'] = imagen
-            return imagenes
-
 
 if __name__ == "__main__":
     main()

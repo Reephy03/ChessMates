@@ -10,25 +10,36 @@ NEGRO = (0, 0, 0)
 GRIS = (125, 135, 150)
 CELESTE = (70, 70, 70)
 ROJO = (255, 0, 0)
+VERDE = (0, 255, 0)  # Verde para resaltar la pieza seleccionada
 
 
-def dibujar_tablero(ventana, tamano_celda):
-    colores = [BLANCO, CELESTE]
+def dibujar_tablero(ventana, tamano_celda, seleccionada=None, en_jaque=None):
+    colores = [pygame.Color('white'), pygame.Color('gray')]
     for fila in range(8):
-        for columna in range(8):
-            color = colores[(fila + columna) % 2]
-            pygame.draw.rect(ventana, color, pygame.Rect(columna * tamano_celda, fila * tamano_celda, tamano_celda, tamano_celda))
+        for col in range(8):
+            color = colores[(fila + col) % 2]
+            pygame.draw.rect(ventana, color,
+                             pygame.Rect(col * tamano_celda, fila * tamano_celda, tamano_celda, tamano_celda))
+
+            if seleccionada and seleccionada == (fila, col):
+                pygame.draw.rect(ventana, (0, 255, 0),
+                                 pygame.Rect(col * tamano_celda, fila * tamano_celda, tamano_celda, tamano_celda), 4)
+
+            if en_jaque and en_jaque == (fila, col):
+                pygame.draw.rect(ventana, (255, 0, 0),
+                                 pygame.Rect(col * tamano_celda, fila * tamano_celda, tamano_celda, tamano_celda), 4)
 
 
-def dibujar_piezas(ventana, tablero, imagenes):
+def dibujar_piezas(ventana, tablero, imagenes, seleccionada=None, en_jaque=None):
     for fila in range(8):
-        for columna in range(8):
-            pieza = tablero.tablero[fila][columna]
-            if isinstance(pieza, Pieza):
-                imagen = imagenes[f'{pieza.nombre.capitalize()}_{pieza.color}']
-                pos_x = columna * TAMANO_CELDA
-                pos_y = fila * TAMANO_CELDA
-                ventana.blit(imagen, (pos_x, pos_y))
+        for col in range(8):
+            pieza = tablero.tablero[fila][col]
+            if pieza != "  ":
+                ventana.blit(imagenes[str(pieza)], pygame.Rect(col * TAMANO_CELDA, fila * TAMANO_CELDA, TAMANO_CELDA, TAMANO_CELDA))
+                if seleccionada and seleccionada == (fila, col):
+                    pygame.draw.rect(ventana, (0, 255, 0), pygame.Rect(col * TAMANO_CELDA, fila * TAMANO_CELDA, TAMANO_CELDA, TAMANO_CELDA), 4)
+                if en_jaque and en_jaque == (fila, col):
+                    pygame.draw.rect(ventana, (255, 0, 0), pygame.Rect(col * TAMANO_CELDA, fila * TAMANO_CELDA, TAMANO_CELDA, TAMANO_CELDA), 4)
 
 
 def dibujar_menu_promocion(ventana, color, tamano_celda):
@@ -45,7 +56,6 @@ def dibujar_menu_promocion(ventana, color, tamano_celda):
         ventana.blit(texto, (tamano_celda // 2, (i + 2) * tamano_celda))
     pygame.display.flip()
 
-
 def obtener_eleccion_promocion(ventana, tamano_celda):
     while True:
         for evento in pygame.event.get():
@@ -57,7 +67,6 @@ def obtener_eleccion_promocion(ventana, tamano_celda):
                 fila = pos[1] // tamano_celda - 2
                 if 0 <= fila < 4:
                     return ['Reina', 'Torre', 'Alfil', 'Caballo'][fila]
-
 
 def mostrar_mensaje(ventana, mensaje, tamano_celda):
     ventana.fill(GRIS)
@@ -92,3 +101,15 @@ def mostrar_mensaje(ventana, mensaje, tamano_celda):
                 return None
             elif evento.type == pygame.MOUSEBUTTONDOWN or evento.type == pygame.KEYDOWN:
                 esperando = False
+
+def cargar_imagenes(tamano_celda):
+    piezas = ['Peon', 'Torre', 'Caballo', 'Alfil', 'Reina', 'Rey']
+    colores = ['Blanco', 'Negro']
+    imagenes = {}
+    for color in colores:
+        for pieza in piezas:
+            nombre_archivo = f'images/{pieza}{color}.png'
+            imagen = pygame.image.load(nombre_archivo)
+            imagen = pygame.transform.scale(imagen, (tamano_celda, tamano_celda))
+            imagenes[f'{color.lower()}{pieza.lower()}'] = imagen
+    return imagenes
